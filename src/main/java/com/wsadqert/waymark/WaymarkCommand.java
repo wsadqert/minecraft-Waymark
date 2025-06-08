@@ -55,24 +55,11 @@ public class WaymarkCommand {
 	public static void sendMessageSaved(CommandContext<CommandSourceStack> ctx, String name, BlockPos pos, ResourceKey<Level> dimension) {
 		sendMessage(ctx, Component.literal("Waymark '")
 			.append(coloredComponent(Component.literal(name), Color.GREEN))
-			.append(Component.literal("' saved at "))
+			.append("' saved at ")
 			.append(coloredComponent(Component.literal("" + pos.getX() + " " + pos.getY() + " " + pos.getZ()), Color.CYAN))
-			.append(Component.literal(" in "))
+			.append(" in ")
 			.append(coloredComponent(Component.literal(levelsMapping.get(dimension.location().getPath())), Color.WHITE))
 		);
-	}
-
-	private static MutableComponent addWaymarkToListComponent(MutableComponent component, Waymark wm) {
-		MutableComponent componentModified = component
-				.append(Component.literal("- "))
-				.append(coloredComponent(Component.literal(wm.name), Color.GREEN))
-				.append(": ")
-				.append(coloredComponent(Component.literal("" + wm.pos.getX() + " " + wm.pos.getY() + " " + wm.pos.getZ()), Color.CYAN))
-				.append(" in ")
-				.append(coloredComponent(Component.literal("" + levelsMapping.get(wm.dimension.getPath())), Color.WHITE))
-				.append("\n");
-		
-		return componentModified;
 	}
 
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -124,7 +111,14 @@ public class WaymarkCommand {
 
 							MutableComponent msgComponent = coloredComponent(Component.literal("Waymarks:\n"), Color.WHITE);
 							for (Waymark wm : data.values()) {
-								msgComponent = addWaymarkToListComponent(msgComponent, wm);
+								msgComponent
+									.append("- ")
+									.append(coloredComponent(Component.literal(wm.name), Color.GREEN))
+									.append(": ")
+									.append(coloredComponent(Component.literal("" + wm.pos.getX() + " " + wm.pos.getY() + " " + wm.pos.getZ()), Color.CYAN))
+									.append(coloredComponent(Component.literal(" in "), Color.GRAY))
+									.append(coloredComponent(Component.literal("" + levelsMapping.get(wm.dimension.getPath())), Color.WHITE))
+									.append("\n");
 							}
 							
 							sendMessage(ctx, msgComponent);
@@ -143,14 +137,14 @@ public class WaymarkCommand {
 								if (data.isEmpty())
 									sendMessage(ctx, coloredComponent(Component.literal("No waymarks saved."), Color.RED));
 
-								MutableComponent msgComponent = coloredComponent(Component.literal("Waymarks:\n"), Color.WHITE);
+								MutableComponent msgComponent = Component.literal("Waymarks in ").append(coloredComponent(Component.literal(levelsMapping.get(dimension.location().getPath())), Color.WHITE)).append(":\n");
 								for (Waymark wm : data.values()) {
-									// TODO: remove in production
-									sendMessage(ctx, Component.literal("" + wm.dimension));
-									sendMessage(ctx, Component.literal("" + dimension.location()));
-
-									if (wm.dimension == dimension.location()) {
-										msgComponent = addWaymarkToListComponent(msgComponent, wm);
+									if (wm.dimension.getPath().equals(dimension.location().getPath())) {
+										msgComponent
+											.append("- ")
+											.append(coloredComponent(Component.literal(wm.name), Color.GREEN))
+											.append(": ")
+											.append(coloredComponent(Component.literal("" + wm.pos.getX() + " " + wm.pos.getY() + " " + wm.pos.getZ()), Color.CYAN));
 									}
 								}
 								
@@ -158,8 +152,6 @@ public class WaymarkCommand {
 
 								return 1;	
 							}))
-						
-						
 						));
 	}
 }
